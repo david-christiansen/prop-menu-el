@@ -105,7 +105,5 @@ When called interactively, WHERE defaults to point."
         (when selection
           (funcall (cdr (assoc (car selection) todo))))))))
 
-(local-set-key (kbd "<mouse-3>") 'prop-menu-show-menu)
-
 (provide 'prop-menu)
 ;;; prop-menu.el ends here
