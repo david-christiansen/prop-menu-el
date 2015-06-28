@@ -4,7 +4,7 @@
 
 ;; Author: David Christiansen <david@davidchristiansen.dk>
 ;; URL: https://github.com/david-christiansen/prop-menu-el
-;; Package-Requires:  ((emacs "24.3") (cl-lib "0.5"))
+;; Package-Requires:  ((emacs "24") (cl-lib "0.5"))
 ;; Version: 0.1
 ;; Keywords: convenience
 
@@ -51,7 +51,7 @@
           (plist-put res k v))))
     res))
 
-(defvar-local prop-menu-item-functions nil
+(defvar prop-menu-item-functions nil
   "A list of functions to compute menu items from text and overlay properties.
 
 Each function should take a plist as its argument and return a
@@ -61,6 +61,7 @@ is selected. Separators can be added by using \"--\" as the string.
 
 Major modes that provide context menus are expected to populate
 this variable with appropriate functions.")
+(make-variable-buffer-local 'prop-menu-item-functions)
 
 (let ((counter 0))
   (defun prop-menu--unique-val ()
