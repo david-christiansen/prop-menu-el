@@ -82,17 +82,23 @@ this variable with appropriate functions.")
 
 When called interactively, WHERE defaults to point."
   (interactive "d")
-  (let* ((menu-items (prop-menu--items-for-location where))
-         (selection (completing-read "Command: " menu-items nil t)))
-    (when selection
-      (let ((cmd (assoc selection menu-items)))
-        (when cmd (funcall (cadr cmd)))))))
+  (let ((menu-items (prop-menu--items-for-location where)))
+    (when menu-items
+      (let ((selection (completing-read "Command: " menu-items nil t)))
+        (when selection
+          (let ((cmd (assoc selection menu-items)))
+            (when cmd (funcall (cadr cmd)))))))))
 
 (defun prop-menu-show-menu (click)
-  "Show a menu based on the location of CLICK, computed from the value of `prop-menu-item-functions'."
+  "Show a menu based on the location of CLICK, computed from the value of `prop-menu-item-functions'.
+
+When calling `prop-menu-item-functions', point is at the clicked
+location."
   (interactive "e")
   (let* ((where (posn-point (event-end click)))
-         (menu-items (prop-menu--items-for-location where)))
+         (menu-items (save-excursion
+                       (goto-char where)
+                       (prop-menu--items-for-location where))))
     (when menu-items
       (let* ((menu (make-sparse-keymap))
              (todo (cl-loop for (str action) in menu-items
