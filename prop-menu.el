@@ -5,7 +5,7 @@
 ;; Author: David Christiansen <david@davidchristiansen.dk>
 ;; URL: https://github.com/david-christiansen/prop-menu-el
 ;; Package-Requires:  ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -95,10 +95,13 @@ When called interactively, WHERE defaults to point."
 When calling `prop-menu-item-functions', point is at the clicked
 location."
   (interactive "e")
-  (let* ((where (posn-point (event-end click)))
-         (menu-items (save-excursion
-                       (goto-char where)
-                       (prop-menu--items-for-location where))))
+  (let* ((window (posn-window (event-end click)))
+         (buffer (window-buffer window))
+         (where (posn-point (event-end click)))
+         (menu-items (with-current-buffer buffer
+                       (save-excursion
+                         (goto-char where)
+                         (prop-menu--items-for-location where)))))
     (when menu-items
       (let* ((menu (make-sparse-keymap))
              (todo (cl-loop for (str action) in menu-items
