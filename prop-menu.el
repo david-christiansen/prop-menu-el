@@ -4,8 +4,8 @@
 
 ;; Author: David Christiansen <david@davidchristiansen.dk>
 ;; URL: https://github.com/david-christiansen/prop-menu-el
-;; Package-Requires:  ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.1.1
+;; Package-Requires:  ((emacs "24.3") (cl-lib "0.5"))
+;; Version: 0.1.2
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -63,14 +63,37 @@ Major modes that provide context menus are expected to populate
 this variable with appropriate functions.")
 (make-variable-buffer-local 'prop-menu-item-functions)
 
-(let ((counter 0))
-  (defun prop-menu--unique-val ()
-    (cl-incf counter)))
+(defvar prop-menu--unique-val-counter 0
+  "A global counter for unique values for prop-menu.")
+(defun prop-menu--unique-val ()
+  "Get a unique value for internal tagging."
+  (cl-incf prop-menu--unique-val-counter))
+
+(defun prop-menu--overlays-at (where)
+  "Return the overlays at location WHERE, sorted in order of priority."
+  (cond ((< emacs-major-version 24)
+         (error "Can't get overlays for prop-menu in Emacs versions < 24"))
+        ((and (= emacs-major-version 24)
+              (< emacs-minor-version 4))
+         ;; The SORTED argument to `overlays-at' was added in Emacs 24.4. Here, we fake it.
+         (let ((overlays (overlays-at where)))
+           (sort overlays
+                 #'(lambda (o1 o2)
+                     (let ((p1 (or (overlay-get o1 'priority) 0))
+                           (p2 (or (overlay-get o2 'priority) 0)))
+                       (when (not (numberp p1)) (setq p1 0))
+                       (when (not (numberp p2)) (setq p2 0))
+                       (or (> p1 p2)
+                           (and (= p1 p2)
+                                (> (overlay-start o1) (overlay-start o2)))))))))
+        ;; In Emacs 24.4 and up, we can just have Emacs do the sorting.
+        ;; Warnings are disabled here to not break CI for Emacs 24.3.
+        (t (with-no-warnings (overlays-at where t)))))
 
 (defun prop-menu--items-for-location (where)
   "Return the menu items based on the text properties and overlays at WHERE."
   (let* ((text-props (text-properties-at where))
-         (overlays (overlays-at where t))
+         (overlays (prop-menu--overlays-at where))
          (overlay-props-list (mapcar #'overlay-properties overlays))
          (props (prop-menu--merge-plists (cons text-props overlay-props-list))))
     (apply #'append
