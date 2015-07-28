@@ -4,8 +4,8 @@
 
 ;; Author: David Christiansen <david@davidchristiansen.dk>
 ;; URL: https://github.com/david-christiansen/prop-menu-el
-;; Package-Requires:  ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.1.1
+;; Package-Requires:  ((emacs "24.3") (cl-lib "0.5"))
+;; Version: 0.1.2
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
